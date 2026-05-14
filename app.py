@@ -194,24 +194,6 @@ if st.button("🚀 Generate Scripts"):
     else:
         st.success("No major issues detected ✅")
 
-
-
 import os
 os.environ["GEMINI_API_KEY"] = "Gemini_API_Key"
 
-
-from google.colab import userdata
-from pyngrok import ngrok
-
-# Get ngrok auth token from Colab secrets
-NGROK_AUTH_TOKEN = userdata.get('NGROK_AUTH_TOKEN')
-ngrok.set_auth_token(NGROK_AUTH_TOKEN)
-
-print("ngrok authenticated!")
-
-
-#Run streamlit app
-
-!streamlit run app.py &>/dev/null &
-from pyngrok import ngrok
-print(ngrok.connect(8501))
