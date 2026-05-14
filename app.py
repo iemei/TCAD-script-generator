@@ -27,12 +27,12 @@ embed_model = load_models()
 # =========================
 @st.cache_resource
 def load_index():
-    index = faiss.read_index("vectorstore/faiss_index.bin")
+    index = faiss.read_index("vectorbase/faiss_index.bin")
 
-    with open("vectorstore/chunks.pkl", "rb") as f:
+    with open("vectorbase/chunks.pkl", "rb") as f:
         all_chunks = pickle.load(f)
 
-    with open("vectorstore/tags.pkl", "rb") as f:
+    with open("vectorbase/tags.pkl", "rb") as f:
         all_tags = pickle.load(f)
 
     return index, all_chunks, all_tags
