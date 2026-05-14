@@ -7,6 +7,8 @@ import pickle
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 
+from src.config import FAISS_INDEX_PATH, CHUNKS_PATH, TAGS_PATH
+
 # =========================
 # CONFIG
 # =========================
