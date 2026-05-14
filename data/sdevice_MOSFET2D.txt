@@ -1,0 +1,74 @@
+File {
+  Grid    = "nmos_msh.tdr"
+  Plot    = "nmos_des.tdr"
+  Current = "nmos_des.plt"
+  Output  = "nmos_des.log"
+}
+
+Electrode {
+  { name="source" voltage=0 }
+  { name="drain" voltage=0 }
+  { name="gate" voltage=0 Workfunction=4.6 }
+  { name="body" voltage=0 }
+}
+
+Physics {
+  Mobility(
+    DopingDependence
+    HighFieldSaturation
+    Enormal
+  )
+
+  Mobility( Lombardi )
+
+  Recombination(
+    SRH(DopingDependence)
+  )
+
+  EffectiveIntrinsicDensity(
+    BandGapNarrowing (OldSlotboom)
+  )
+
+  Fermi
+}
+
+Plot {
+  eDensity hDensity
+  Potential ElectricField
+  eCurrent hCurrent
+  Doping
+  eQuasiFermi hQuasiFermi
+}
+
+Math {
+  Extrapolate
+  RelErrControl
+  Digits=5
+  Iterations=80
+}
+
+Solve {
+
+  Poisson
+
+  Coupled { Poisson }
+
+  Coupled { Poisson Electron Hole }
+
+  ;; Drain ramp
+  Quasistationary (
+    InitialStep=0.01 MaxStep=0.05
+    Goal { Name="drain" Voltage=0.05 }
+  )
+  { Coupled { Poisson Electron Hole } }
+
+  ;; Id–Vg sweep
+  NewCurrentPrefix="IdVg_"
+
+  Quasistationary (
+    InitialStep=1e-3 MinStep=1e-5 MaxStep=0.02
+    Goal { Name="gate" Voltage=1.2 }
+  )
+  { Coupled { Poisson Electron Hole } }
+
+}

@@ -1,0 +1,124 @@
+(sde:clear)
+
+;; =========================
+;; PARAMETERS (um units)
+;; =========================
+(define Lg 0.025)     ; 25 nm gate
+(define Ltot 0.045)   ; total length
+(define Tsub 0.3)     ; substrate depth
+(define Tch 0.01)     ; channel thickness
+(define Tox 0.002)    ; 2 nm oxide
+(define Tgate 0.02)   ; metal gate height
+
+;; =========================
+;; GEOMETRY
+;; =========================
+
+;; Substrate
+(sdegeo:create-rectangle (position 0 (- Tsub) 0) (position Ltot 0 0) "Silicon" "Substrate")
+
+;; Source
+(sdegeo:create-rectangle (position 0 0 0) (position 0.01 Tch 0) "Silicon" "Source")
+
+;; Drain
+(sdegeo:create-rectangle (position (- Ltot 0.01) 0 0) (position Ltot Tch 0) "Silicon" "Drain")
+
+;; Channel (between S/D)
+(sdegeo:create-rectangle (position 0.01 0 0) (position (- Ltot 0.01) Tch 0) "Silicon" "Channel")
+
+;; Gate oxide (HfO2)
+(sdegeo:create-rectangle (position 0.01 Tch 0) (position (- Ltot 0.01) (+ Tch Tox) 0) "HfO2" "GateOxide")
+
+;; Gate (TiN)
+(sdegeo:create-rectangle (position 0.01 (+ Tch Tox) 0) (position (- Ltot 0.01) (+ Tch Tox Tgate) 0) "TiN" "Gate")
+
+;; Body contact metal
+(sdegeo:create-rectangle (position 0 (- Tsub) 0) (position Ltot (- Tsub 0.02) 0) "TiN" "Body")
+
+;; =========================
+;; DOPING
+;; =========================
+
+;; Substrate (p-type)
+(sdedr:define-constant-profile "SubDop" "BoronActiveConcentration" 1e16)
+(sdedr:define-constant-profile-region "SubDop" "SubDop" "Substrate")
+
+;; Source/Drain (n+)
+(sdedr:define-gaussian-profile "SD" "PhosphorusActiveConcentration"
+  "PeakPos" 0 "PeakVal" 1e20 "ValueAtDepth" 1e18 "Depth" 0.03 "Gauss" "Factor" 0.8)
+
+(sdedr:define-gaussian-profile-placement "SD.S" "SD"
+  (position 0 0 0) (position 0.01 Tch 0))
+
+(sdedr:define-gaussian-profile-placement "SD.D" "SD"
+  (position (- Ltot 0.01) 0 0) (position Ltot Tch 0))
+
+;; LDD
+(sdedr:define-gaussian-profile "LDD" "PhosphorusActiveConcentration"
+  "PeakPos" 0 "PeakVal" 5e18 "ValueAtDepth" 1e17 "Depth" 0.015 "Gauss" "Factor" 0.8)
+
+(sdedr:define-gaussian-profile-placement "LDD.S" "LDD" (position 0.01 0 0) (position 0.015 Tch 0))
+
+(sdedr:define-gaussian-profile-placement "LDD.D" "LDD" (position (- Ltot 0.015) 0 0) (position (- Ltot 0.01) Tch 0))
+
+;; Halo (p-type)
+(sdedr:define-gaussian-profile "Halo" "BoronActiveConcentration" "PeakPos" 0 "PeakVal" 5e18 "ValueAtDepth" 1e17 "Depth" 0.02 "Gauss" "Factor" 0.5)
+
+(sdedr:define-gaussian-profile-placement "Halo.S" "Halo" (position 0.01 0 0) (position 0.02 Tch 0))
+
+(sdedr:define-gaussian-profile-placement "Halo.D" "Halo" (position (- Ltot 0.02) 0 0) (position (- Ltot 0.01) Tch 0))
+
+;; =========================
+;; CONTACTS
+;; =========================
+
+(sdegeo:define-contact-set "source" 4 (color:rgb 1 0 0) "##")
+(sdegeo:define-contact-set "drain" 4 (color:rgb 0 0 1) "##")
+(sdegeo:define-contact-set "gate" 4 (color:rgb 0 1 0) "##")
+(sdegeo:define-contact-set "body" 4 (color:rgb 0 1 1) "##")
+
+(sdegeo:define-2d-contact 
+  (find-edge-id (position 0 (/ Tch 2) 0)) "source")
+
+(sdegeo:define-2d-contact 
+  (find-edge-id (position Ltot (/ Tch 2) 0)) "drain")
+
+(sdegeo:define-2d-contact 
+  (find-edge-id (position (/ Ltot 2) (+ Tch Tox Tgate) 0)) "gate")
+
+(sdegeo:define-2d-contact 
+  (find-edge-id (position (/ Ltot 2) (- Tsub 0.02) 0)) "body")
+
+(sde:refresh)
+
+;; =========================
+;; MESH REFINEMENT
+;; =========================
+
+;; Global
+(sdedr:define-refinement-size "global" 0.01 0.01 0.01 0.005 0.005 0.005)
+(sdedr:define-refinement-material "global" "global" "Silicon")
+
+;; Interface (critical)
+(sdedr:define-refinement-window "intWin" "Rectangle"
+  (position 0 Tch 0)
+  (position Ltot (+ Tch Tox) 0))
+
+(sdedr:define-refinement-size "interface" 
+  0.001 0.001 0.001 0.0005 0.0005 0.0005)
+
+(sdedr:define-refinement-placement "intRef" "interface" "intWin")
+
+;; Doping gradient
+(sdedr:define-refinement-function "doping" 
+  "DopingConcentration" "MaxTransDiff" 1)
+
+(sdedr:define-refinement-material "doping" "doping" "Silicon")
+
+;; =========================
+;; BUILD MESH
+;; =========================
+
+(sde:build-mesh "snmesh" "-y 1e5" "nmos_msh")
+
+(display "DONE")
