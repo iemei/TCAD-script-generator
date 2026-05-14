@@ -6,7 +6,6 @@ import numpy as np
 import pickle
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
-from google.colab import userdata
 
 # =========================
 # CONFIG
