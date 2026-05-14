@@ -7,8 +7,6 @@ import pickle
 from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 
-from src.config import FAISS_INDEX_PATH, CHUNKS_PATH, TAGS_PATH
-
 # =========================
 # CONFIG
 # =========================
@@ -29,12 +27,12 @@ embed_model = load_models()
 # =========================
 @st.cache_resource
 def load_index():
-    index = faiss.read_index(FAISS_INDEX_PATH)
+    index = faiss.read_index("vectorstore/faiss_index.bin")
 
-    with open(CHUNKS_PATH, "rb") as f:
+    with open("vectorstore/chunks.pkl", "rb") as f:
         all_chunks = pickle.load(f)
 
-    with open(TAGS_PATH, "rb") as f:
+    with open("vectorstore/tags.pkl", "rb") as f:
         all_tags = pickle.load(f)
 
     return index, all_chunks, all_tags
