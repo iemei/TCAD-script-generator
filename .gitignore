@@ -15,11 +15,6 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Vector database and generated artifacts
-vectorstore/
-*.bin
-*.pkl
-
 # OS files
 .DS_Store
 Thumbs.db
