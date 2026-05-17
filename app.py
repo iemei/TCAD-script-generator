@@ -53,7 +53,7 @@ api_key = st.sidebar.text_input(
 
 # Stop app if no key
 if not api_key:
-    st.warning("Please enter your API key to continue")
+    st.warning("Please enter your Google Gemini API key to continue")
     st.stop()
 
 # Configure Gemini
@@ -144,7 +144,7 @@ def validate(script):
 # =========================
 # UI
 # =========================
-st.title("🧠 TCAD Script Generator (RAG + Gemini)")
+st.title("🧠 TCAD Script Generator")
 
 col1, col2 = st.columns(2)
 
